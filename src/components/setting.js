@@ -1,6 +1,6 @@
 
 import React, { Component } from 'react';
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import { Platform, StyleSheet, Text, View, AsyncStorage } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import TextBox from './common/textbox';
@@ -20,13 +20,24 @@ export default class Setting extends Component{
   }
 
   // -----------------------------------------------------------------
+  async componentWillMount(){
+    let host = await AsyncStorage.getItem('host');
+    let port = await AsyncStorage.getItem('port');
+    this.setState({host: host, port: port});
+  }
+
+  // -----------------------------------------------------------------
   onChangeText(value, context){
     let state = {};
     state[context] = value;
     this.setState(state);
   }
 
-  onSave(){
+  // -----------------------------------------------------------------
+  async onSave(){
+    await AsyncStorage.setItem('host', this.state.host);
+    await AsyncStorage.setItem('port', this.state.port);
+
     this.props.navigation.goBack();
   }
 
@@ -39,12 +50,12 @@ export default class Setting extends Component{
 
         <View style={styles.textboxContainer}>
           <Text style={styles.label}>HOST</Text>
-          <TextBox name="host" onChangeText={this.onChangeText} placeholder="Host"/>
+          <TextBox name="host" onChangeText={this.onChangeText} placeholder="Host" value={this.state.host}/>
         </View>
 
         <View style={styles.textboxContainer}>
           <Text style={styles.label}>PORT</Text>
-          <TextBox name="port" onChangeText={this.onChangeText} placeholder="Port"/>
+          <TextBox name="port" onChangeText={this.onChangeText} placeholder="Port" value={this.state.port}/>
         </View>
 
         <View style={styles.buttonPanel}>

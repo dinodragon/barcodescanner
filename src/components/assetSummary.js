@@ -1,11 +1,14 @@
 
 import React, { Component } from 'react';
-import { Platform, StyleSheet, Text, View, BackHandler, AsyncStorage } from 'react-native';
+import { Platform, StyleSheet, Text, View, BackHandler, AsyncStorage, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import TextBox from './common/textbox';
 import Button from './common/button';
+import Api from '../api';
+import LoadingIcon from './common/loadingIcon';
 
+const backgroundColors = ['#f5f5f5', 'white']
 export default class AssetSummary extends Component{
   constructor(props){
     super(props);
@@ -15,15 +18,16 @@ export default class AssetSummary extends Component{
       faCode: data[0],
       groupCode: data[1],
       createdDate: data[2],
-      location: data[3]
+      location: data[3],
+      detail: null,
+      loading: false,
+      successMessage: null
     };
 
     this.goBack = this.goBack.bind(this);
     this.onDetailsClick = this.onDetailsClick.bind(this);
     this.onSave = this.onSave.bind(this);
     this.onChangeText = this.onChangeText.bind(this);
-    
-    debugger
   }
 
   // -----------------------------------------------------------------
@@ -44,14 +48,24 @@ export default class AssetSummary extends Component{
   }
 
   // -----------------------------------------------------------------
-  onDetailsClick(){
-    alert('no screen design provided for this.');
+  async onDetailsClick(){
+    this.setState({loading: true});
+    let resp = await Api.get(`api/Assets/${this.state.faCode}`);
+    if(!resp.ok) return;
+    
+    let detail = await resp.json();
+    setTimeout(() => this.setState({detail: detail, loading: false}), 1000);
   }
 
   // -----------------------------------------------------------------
-  onSave(){
-    alert(`location ${this.state.location} will be updated.`);
-    this.goBack();
+  async onSave(){
+    let resp = await Api.put(`Assets/${this.state.faCode}/Location/${this.state.location}`);
+    if(!resp.ok) return;
+
+    this.setState({successMessage: 'The location had been succesfully updated.'});
+    if(this.state.detail) this.onDetailsClick();
+
+    setTimeout(() => this.setState({successMessage: null}), 3000);
   }
 
   // -----------------------------------------------------------------
@@ -65,7 +79,7 @@ export default class AssetSummary extends Component{
   render(){
     let { groupCode, faCode, createdDate, location } = this.state;
     return(
-      <View style={styles.container}>
+      <ScrollView style={styles.container}>
         <Icon name="md-cube" size={100} color="#ef893d" style={{textAlign: 'center', margin: 20}}/>
 
         <View style={styles.infoFrame}>
@@ -91,7 +105,25 @@ export default class AssetSummary extends Component{
           <Button label="DETAILS" onPress={this.onDetailsClick} style={styles.button}/>
           <Button label="SAVE" onPress={this.onSave} style={styles.button}/>
         </View>
-      </View>
+        { this.state.successMessage && <Text style={{textAlign: 'center', color: 'green'}}>{this.state.successMessage}</Text> }
+        { this.state.loading && 
+          <View style={{alignItems: 'center'}}><LoadingIcon/></View> 
+        }
+        { !this.state.loading && this.state.detail && 
+          <View style={styles.infoFrame}>
+            {
+              Object.keys(this.state.detail).map((v, i) => {
+                return(
+                  <View style={[styles.infoRow, {backgroundColor: backgroundColors[i % 2]}]} key={i}>
+                    <Text style={styles.titleLabel}>{v}</Text>
+                    <Text style={styles.valueLabel}>{this.state.detail[v]}</Text>
+                  </View>
+                )
+              })
+            }
+          </View>
+        }
+      </ScrollView>
     )
   }
 }
@@ -108,13 +140,15 @@ const styles = StyleSheet.create({
 
   infoRow: {
     flexDirection: 'row',
-    marginVertical: 5,
+    paddingVertical: 5,
     alignItems: 'center'
   },
 
   titleLabel: {
     fontWeight: 'bold',
-    flex: 1
+    flex: 1,
+    paddingLeft: 5,
+    marginRight: 10
   },
 
   valueLabel: {

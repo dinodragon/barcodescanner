@@ -15,10 +15,12 @@ export default class App extends Component<{}> {
     };
   }
 
+  // -----------------------------------------------------------------
   componentDidMount(){
     setTimeout(() => this.setState({showSplash: false}), 1000);
   }
 
+  // -----------------------------------------------------------------
   render() {
     return(
       <View style={styles.container}>
