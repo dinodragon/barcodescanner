@@ -1,6 +1,6 @@
 
 import React, { Component } from 'react';
-import { Platform, StyleSheet, Text, View, FlatList, TouchableOpacity } from 'react-native';
+import { Platform, StyleSheet, Text, View, ListView, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {default as IonIcon} from 'react-native-vector-icons/Ionicons';
 
@@ -11,7 +11,6 @@ import Api from '../api';
 export default class ValidateAssets extends Component{
   constructor(props){
     super(props);
-
     this.state = {
       faCode: null,
       assets: []
@@ -26,6 +25,7 @@ export default class ValidateAssets extends Component{
 
     this.validationId = this.props.navigation.state.params.validationId;
     this.masterId = this.props.navigation.state.params.StockTakeMasterID;
+    this.datasource = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
   }
 
   // -----------------------------------------------------------------
@@ -70,12 +70,12 @@ export default class ValidateAssets extends Component{
   }
 
   // -----------------------------------------------------------------
-  renderRow(data){
+  renderRow(code){
     return(
-      <View style={styles.assetRow} key={data.index + 1}>
+      <View style={styles.assetRow} key={code}>
         <Icon name="archive" size={30} color="lightgrey"/>
-        <Text style={{marginLeft: 20, fontWeight: 'bold', fontSize: 16, flex: 1}}>{data.item}</Text>
-        <TouchableOpacity style={{paddingHorizontal: 20, paddingVertical: 10}} onPress={() => this.onRemove(data.item)}>
+        <Text style={{marginLeft: 20, fontWeight: 'bold', fontSize: 16, flex: 1}}>{code}</Text>
+        <TouchableOpacity style={{paddingHorizontal: 20, paddingVertical: 10}} onPress={() => this.onRemove(code)}>
           <IonIcon name="ios-trash" size={30} color="#414141"/>
         </TouchableOpacity>
       </View>
@@ -84,6 +84,7 @@ export default class ValidateAssets extends Component{
 
   // -----------------------------------------------------------------
   render(){
+    let datasource = this.datasource.cloneWithRows(this.state.assets);
     return(
       <View style={styles.container}>
         <Icon name="pencil" size={100} color="#ef893d" style={{textAlign: 'center', margin: 20}}/>
@@ -98,9 +99,10 @@ export default class ValidateAssets extends Component{
           <Button label="ADD" onPress={this.onAdd} style={styles.addButton}/>
         </View>
 
-        <FlatList
-          data={this.state.assets}
-          renderItem={this.renderRow}
+        <ListView
+          enableEmptySections
+          dataSource={datasource}
+          renderRow={this.renderRow}
         />
       </View>
     )
