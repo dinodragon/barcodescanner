@@ -5,16 +5,15 @@ import Camera from 'react-native-camera';
 
 import ScannerBase from './scannerBase';
 
-export default class Scanner extends Component{
+export default class ValidateAssetsScanner extends Component{
   constructor(props){
     super(props);
-
     this.onBarCodeRead = this.onBarCodeRead.bind(this);
-    AsyncStorage.setItem('scanner-screen-key', props.navigation.state.key);
   }
 
   onBarCodeRead(data){
-    this.props.navigation.navigate('AssetSummary', data);
+    this.props.navigation.state.params.onBarCodeRead(data);
+    this.props.navigation.goBack(null);
   }
 
   render(){

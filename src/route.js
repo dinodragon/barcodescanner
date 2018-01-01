@@ -10,6 +10,7 @@ import AssetSummary from './components/assetSummary';
 import Setting from './components/setting';
 import AssetValidation from './components/assetValidation';
 import ValidateAssets from './components/validateAssets';
+import ValidateAssetsScanner from './components/validateAssetsScanner';
 
 const RootNavigator = StackNavigator({
   Login: {
@@ -60,7 +61,13 @@ const RootNavigator = StackNavigator({
     navigationOptions: ({navigation}) => ({
       title: 'VALIDATE ASSETS'
     })
-  }
+  },
+  ValidateAssetsScanner: {
+    screen: ValidateAssetsScanner,
+    navigationOptions: ({navigation}) => ({
+      header: null
+    })
+  },
 },{
   navigationOptions: ({navigation}) => ({
     headerStyle: { backgroundColor: '#414141' },

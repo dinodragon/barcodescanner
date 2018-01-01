@@ -16,7 +16,7 @@ class Api {
   }
 
   // -----------------------------------------------------------------
-  async post(url, data){
+  async post(url, data = null){
     return await this.base(url, 'POST', data);
   }
 
@@ -38,9 +38,6 @@ class Api {
       Object.assign(config, { data: data })
 
     let response = await fetch(fullUrl, config);
-    if(!response.ok) 
-      alert('Something went wrong when performing the action. Please contact admin for support.');
-
     return response;
   }
 }
