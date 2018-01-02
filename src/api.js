@@ -26,6 +26,11 @@ class Api {
   }
 
   // -----------------------------------------------------------------
+  async delete(url, data = null){
+    return await this.base(url, 'DELETE', data);
+  }
+
+  // -----------------------------------------------------------------
   async base(url, method, data = null){
     if(!this.host){
       this.host = await AsyncStorage.getItem('host');

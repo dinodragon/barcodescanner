@@ -39,7 +39,7 @@ export default class ValidateAssets extends Component{
   async onAdd(){
     if(!this.state.faCode || this.state.faCode.trim() == "") return;
 
-    if(this.state.assets.some(a => a == this.state.faCode)){
+    if(this.state.assets.some(a => a.u_facode == this.state.faCode)){
       alert('The same stock had already been picked up.');
       return;
     }
@@ -50,12 +50,19 @@ export default class ValidateAssets extends Component{
       return;
     }
 
-    this.setState({faCode: null, assets: [this.state.faCode, ...this.state.assets]});
+    let data = await resp.json();
+    this.setState({faCode: null, assets: [data, ...this.state.assets]});
   }
 
   // -----------------------------------------------------------------
-  onRemove(faCode){
-    this.setState({assets: this.state.assets.filter(code => code != faCode)});
+  async onRemove(lineId, faCode){
+    let resp = await Api.delete(`api/StockTakeLines?stockTakeLineID=${lineId}`);
+    if(!resp.ok){
+      alert(`Error happen when trying to remove item ${faCode}. Please try again. If the error persist, please contact admin for help.`);
+      return;
+    }
+
+    this.setState({assets: this.state.assets.filter(data => data.StockTakeLineID != lineId)});
   }
 
   // -----------------------------------------------------------------
@@ -70,12 +77,12 @@ export default class ValidateAssets extends Component{
   }
 
   // -----------------------------------------------------------------
-  renderRow(code){
+  renderRow(data){
     return(
-      <View style={styles.assetRow} key={code}>
+      <View style={styles.assetRow} key={data.u_facode}>
         <Icon name="archive" size={30} color="lightgrey"/>
-        <Text style={{marginLeft: 20, fontWeight: 'bold', fontSize: 16, flex: 1}}>{code}</Text>
-        <TouchableOpacity style={{paddingHorizontal: 20, paddingVertical: 10}} onPress={() => this.onRemove(code)}>
+        <Text style={{marginLeft: 20, fontWeight: 'bold', fontSize: 16, flex: 1}}>{data.u_facode}</Text>
+        <TouchableOpacity style={{paddingHorizontal: 20, paddingVertical: 10}} onPress={() => this.onRemove(data.StockTakeLineID, data.u_facode)}>
           <IonIcon name="ios-trash" size={30} color="#414141"/>
         </TouchableOpacity>
       </View>
