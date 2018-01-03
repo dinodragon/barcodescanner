@@ -37,13 +37,19 @@ class Api {
       this.port = await AsyncStorage.getItem('port');
     }
 
-    let fullUrl = `${this.host}/${url}`
+    let fullUrl = this.port ? `${this.host}:${this.port}/${url}` : `${this.host}/${url}`;
     let config = { method: method };
     if(data)
       Object.assign(config, { data: data })
 
     let response = await fetch(fullUrl, config);
     return response;
+  }
+
+  // -----------------------------------------------------------------
+  resetHost(){
+    this.host = null;
+    this.port = null;
   }
 }
 

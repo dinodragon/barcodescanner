@@ -5,6 +5,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 import TextBox from './common/textbox';
 import Button from './common/button';
+import Api from '../api';
 
 export default class Setting extends Component{
   constructor(props){
@@ -35,9 +36,10 @@ export default class Setting extends Component{
 
   // -----------------------------------------------------------------
   async onSave(){
-    await AsyncStorage.setItem('host', this.state.host);
-    await AsyncStorage.setItem('port', this.state.port);
+    await AsyncStorage.setItem('host', this.state.host || "");
+    await AsyncStorage.setItem('port', this.state.port || "");
 
+    Api.resetHost();
     this.props.navigation.goBack();
   }
 
