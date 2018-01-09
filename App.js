@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Platform, StyleSheet, Text, View, Image } from 'react-native';
+import { Platform, StyleSheet, Text, View, ImageBackground, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import RootNavigator from './src/route';
@@ -17,7 +17,7 @@ export default class App extends Component<{}> {
 
   // -----------------------------------------------------------------
   componentDidMount(){
-    setTimeout(() => this.setState({showSplash: false}), 1000);
+    setTimeout(() => this.setState({showSplash: false}), 2000);
   }
 
   // -----------------------------------------------------------------
@@ -26,9 +26,7 @@ export default class App extends Component<{}> {
       <View style={styles.container}>
         {
           this.state.showSplash &&
-          <View style={styles.splash}>
-            <Image style={styles.splashImage} source={{uri: 'https://s3-ap-southeast-1.amazonaws.com/cel-barcodescanner/splash.jpeg'}} resizeMode="cover"/>
-          </View>
+          <ImageBackground style={styles.splash} source={{uri: 'https://s3-ap-southeast-1.amazonaws.com/cel-barcodescanner/splash.jpeg'}} resizeMode="cover"/>
         }
         {
           !this.state.showSplash && <RootNavigator/>
@@ -52,7 +50,7 @@ const styles = StyleSheet.create({
   },
 
   splashImage: {
-    width: 300,
-    height: 300
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height
   }
 });

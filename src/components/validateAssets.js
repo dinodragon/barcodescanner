@@ -1,6 +1,6 @@
 
 import React, { Component } from 'react';
-import { Platform, StyleSheet, Text, View, ListView, TouchableOpacity } from 'react-native';
+import { Platform, StyleSheet, Text, View, ListView, TouchableOpacity, AsyncStorage } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {default as IonIcon} from 'react-native-vector-icons/Ionicons';
 
@@ -13,7 +13,9 @@ export default class ValidateAssets extends Component{
     super(props);
     this.state = {
       faCode: null,
-      assets: []
+      assets: [],
+      userId: null,
+      errorMessage: null
     };
 
     this.onChangeText = this.onChangeText.bind(this);
@@ -26,6 +28,22 @@ export default class ValidateAssets extends Component{
     this.validationId = this.props.navigation.state.params.validationId;
     this.masterId = this.props.navigation.state.params.StockTakeMasterID;
     this.datasource = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+  }
+
+  // -----------------------------------------------------------------
+  async componentWillMount(){
+    let userId = await AsyncStorage.getItem("userId");
+    this.setState({userId: userId});
+
+    let resp = await Api.get(`api/StockTakeLines?stockTakeMasterID=${this.masterId}&userid=${userId}`);
+    if(!resp.ok){
+      alert('Error happen while retreiving the existing items. Please contact admin for support.');
+      this.setState({errorMessage: 'Error happen while retreiving the existing items'});
+      return;
+    }
+
+    let assets = await resp.json();
+    this.setState({assets: assets});
   }
 
   // -----------------------------------------------------------------
@@ -44,7 +62,7 @@ export default class ValidateAssets extends Component{
       return;
     }
 
-    let resp = await Api.post(`api/StockTakeLines?item.stockTakeMasterID=${this.masterId}&item.u_facode=${this.state.faCode}`);
+    let resp = await Api.post(`api/StockTakeLines?item.stockTakeMasterID=${this.masterId}&item.u_facode=${this.state.faCode}&item.userid=${this.state.userId}`);
     if(!resp.ok) {
       alert('Error occur while picking up stock. Please try again. If the error persist, please contact admin for help.');
       return;
@@ -69,6 +87,7 @@ export default class ValidateAssets extends Component{
   onBarCodeRead(data){
     let faCode = data.data.split('#')[0];
     this.setState({faCode: faCode});
+    this.onAdd();
   }
 
   // -----------------------------------------------------------------
@@ -94,7 +113,7 @@ export default class ValidateAssets extends Component{
     let datasource = this.datasource.cloneWithRows(this.state.assets);
     return(
       <View style={styles.container}>
-        <Icon name="pencil" size={100} color="#ef893d" style={{textAlign: 'center', margin: 20}}/>
+        <Icon name="pencil" size={75} color="#ef893d" style={{textAlign: 'center', margin: 20}}/>
         <Text style={styles.title}>Please scan asset QR or enter asset code</Text>
         <Text style={styles.title}>VALIDATION ID: <Text style={{color: 'grey'}}>{this.validationId}</Text></Text>
 
@@ -105,6 +124,8 @@ export default class ValidateAssets extends Component{
           <TextBox name="faCode" onChangeText={this.onChangeText} style={{flex: 1}} value={this.state.faCode}/>
           <Button label="ADD" onPress={this.onAdd} style={styles.addButton}/>
         </View>
+
+        <Text style={styles.errorMessage}>{this.state.errorMessage}</Text>
 
         <ListView
           enableEmptySections
@@ -147,5 +168,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderTopWidth: 1,
     borderTopColor: 'lightgrey'
-  }
+  },
+
+  errorMessage: {
+    textAlign: 'center',
+    color: 'red',
+    marginHorizontal: 30
+  },
 });

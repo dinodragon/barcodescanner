@@ -38,6 +38,10 @@ export default class Login extends Component{
       return;
     }
 
+    let user = await resp.json();
+    await AsyncStorage.setItem('userId', user.user_id);
+    await AsyncStorage.setItem('userGroup', user.user_group);
+
     this.setState({errorMessage: null});
     this.props.navigation.navigate('Home');
   }
