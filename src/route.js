@@ -45,6 +45,7 @@ const RootNavigator = StackNavigator({
         <TouchableHighlight>
           <Icon style={{padding: 15}} name="arrow-left" size={20} color="#f5f5f5" onPress={async () => {
             let key = await AsyncStorage.getItem('scanner-screen-key');
+            await AsyncStorage.removeItem('scanner-screen-key');
             navigation.goBack(key);
           }}/>
         </TouchableHighlight>)

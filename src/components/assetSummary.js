@@ -43,6 +43,7 @@ export default class AssetSummary extends Component{
   // -----------------------------------------------------------------
   async goBack(){
     let key = await AsyncStorage.getItem('scanner-screen-key');
+    await AsyncStorage.removeItem('scanner-screen-key');
     this.props.navigation.goBack(key);
     return true;
   }
